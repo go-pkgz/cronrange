@@ -2,9 +2,7 @@
 // Unlike traditional crontab that defines specific moments in time, cronrange
 // defines time periods when something should be active.
 //
-// Format:
-//
-//	time dow dom month
+// Format: `time dow dom month`
 //
 // Where:
 //   - time:  Time range in 24h format (HH:MM-HH:MM) or * for all day

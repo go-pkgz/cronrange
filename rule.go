@@ -86,9 +86,10 @@ func parseTimeRange(s string) (TimeRange, error) {
 	return TimeRange{start: start, end: end}, nil
 }
 
+// parseTime parses a time string in the following formats: HH:MM, HH-MM-SS
 func parseTime(s string) (time.Duration, error) {
 	parts := strings.Split(s, ":")
-	if len(parts) != 2 {
+	if len(parts) < 2 || len(parts) > 3 {
 		return 0, fmt.Errorf("invalid time format")
 	}
 
@@ -102,11 +103,19 @@ func parseTime(s string) (time.Duration, error) {
 		return 0, err
 	}
 
-	if hours < 0 || hours > 23 || minutes < 0 || minutes > 59 {
+	seconds := 0
+	if len(parts) == 3 {
+		seconds, err = strconv.Atoi(parts[2])
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	if hours < 0 || hours > 23 || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59 {
 		return 0, fmt.Errorf("invalid time values")
 	}
 
-	return time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute, nil
+	return time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute + time.Duration(seconds)*time.Second, nil
 }
 
 func parseField(s string, min, max int) (Field, error) {
@@ -201,8 +210,14 @@ func (tr TimeRange) String() string {
 	}
 	startH := tr.start / time.Hour
 	startM := (tr.start % time.Hour) / time.Minute
+	startS := (tr.start % time.Minute) / time.Second
 	endH := tr.end / time.Hour
 	endM := (tr.end % time.Hour) / time.Minute
+	endS := (tr.end % time.Minute) / time.Second
+
+	if startS > 0 || endS > 0 {
+		return fmt.Sprintf("%02d:%02d:%02d-%02d:%02d:%02d", startH, startM, startS, endH, endM, endS)
+	}
 	return fmt.Sprintf("%02d:%02d-%02d:%02d", startH, startM, endH, endM)
 }
 

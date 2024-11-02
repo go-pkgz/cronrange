@@ -23,6 +23,11 @@ func TestParseTimeRange(t *testing.T) {
 			want: "09:00-17:00",
 		},
 		{
+			name: "range with seconds",
+			s:    "09:00:11-17:00:22",
+			want: "09:00:11-17:00:22",
+		},
+		{
 			name: "evening range",
 			s:    "17:20-21:35",
 			want: "17:20-21:35",
