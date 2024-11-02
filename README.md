@@ -1,6 +1,9 @@
 # cronrange
 
+[![Build Status](https://github.com/go-pkgz/cronrange/workflows/build/badge.svg)](https://github.com/go-pkgz/cronrange/actions) [![Coverage Status](https://coveralls.io/repos/github/go-pkgz/cronrange/badge.svg?branch=master)](https://coveralls.io/github/go-pkgz/cronrange?branch=master) [![Go Reference](https://pkg.go.dev/badge/github.com/go-pkgz/cronrange.svg)](https://pkg.go.dev/github.com/go-pkgz/cronrange)
+
 `cronrange` is a Go package that provides a crontab-like format for expressing time ranges, particularly useful for defining recurring time windows. Unlike traditional crontab that defines specific moments in time, cronrange defines time periods when something should be active or eligible.
+
 
 ## Format
 
