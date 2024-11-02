@@ -5,7 +5,7 @@
 // Format: `time dow dom month`
 //
 // Where:
-//   - time:  Time range in 24h format (HH:MM-HH:MM) or * for all day
+//   - time:  Time range in 24h format (HH:MM[:SS]-HH:MM[:SS]) or * for all day
 //   - dow:   Day of week (0-6, where 0=Sunday)
 //   - dom:   Day of month (1-31)
 //   - month: Month (1-12)
@@ -16,6 +16,7 @@
 // Examples:
 //
 //	17:20-21:35 1-5 * *          # Weekdays from 5:20 PM to 9:35 PM
+//	11:20:12-19:25:18 1-5 * *    # Weekdays from 11:20:12 AM to 7:35:18 PM
 //	* 0,6 * *                    # All day on weekends
 //	09:00-17:00 1-5 * 4-9        # Weekdays 9 AM to 5 PM, April through September
 //	12:00-13:00 * 1,15 *         # Noon-1 PM on 1st and 15th of every month
