@@ -77,6 +77,11 @@ if cronrange.Match(rules, t) {
 fmt.Println(rules[0].String()) // "17:20-21:35 1-5 * *"
 ```
 
+Alternatively, you can use the `ParseFromReader` function to read rules from an `io.Reader`
+
+
+```go
+
 ## Error Handling
 
 The package validates input and provides specific errors:
