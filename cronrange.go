@@ -24,7 +24,10 @@
 package cronrange
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 )
@@ -43,6 +46,35 @@ func Parse(expr string) ([]Rule, error) {
 	}
 
 	return result, nil
+}
+
+// ParseFromReader parses a cronrange expression from a reader and returns a Rule slice
+func ParseFromReader(rdr io.Reader) ([]Rule, error) {
+	buf, err := io.ReadAll(rdr)
+	if err != nil {
+		return nil, fmt.Errorf("can't read from reader: %w", err)
+	}
+	if len(buf) == 0 {
+		return []Rule{}, nil
+	}
+
+	var res []Rule
+	scanner := bufio.NewScanner(bytes.NewReader(buf))
+	for scanner.Scan() {
+		rule := strings.TrimSpace(scanner.Text())
+		if rule == "" {
+			continue
+		}
+		r, err := Parse(rule)
+		if err != nil {
+			return nil, fmt.Errorf("invalid rule '%s': %w", rule, err)
+		}
+		res = append(res, r...)
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("error reading input: %w", err)
+	}
+	return res, nil
 }
 
 // Match checks if the given time matches any of the rules

@@ -1,6 +1,7 @@
 package cronrange
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -173,6 +174,69 @@ func TestMatch(t *testing.T) {
 			got := Match(rules, tt.time)
 			if got != tt.want {
 				t.Errorf("Match() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestParseFromReader(t *testing.T) {
+	equal := func(a, b []string) bool {
+		if len(a) != len(b) {
+			return false
+		}
+		for i := range a {
+			if a[i] != b[i] {
+				return false
+			}
+		}
+		return true
+	}
+	tests := []struct {
+		name    string
+		input   string
+		want    []string // expected String() outputs
+		wantErr bool
+	}{
+		{
+			name:  "single rule",
+			input: "17:20-21:35 1-5 * *",
+			want:  []string{"17:20-21:35 1-5 * *"},
+		},
+		{
+			name:  "multiple rules",
+			input: "17:20-21:35 1-5 * *\n* 0,6 * *",
+			want:  []string{"17:20-21:35 1-5 * *", "* 0,6 * *"},
+		},
+		{
+			name:  "empty input",
+			input: "",
+			want:  []string{},
+		},
+		{
+			name:    "invalid rule",
+			input:   "invalid rule",
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rdr := strings.NewReader(tt.input)
+			got, err := ParseFromReader(rdr)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ParseFromReader() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if err != nil {
+				return
+			}
+
+			var gotStr []string
+			for _, rule := range got {
+				gotStr = append(gotStr, rule.String())
+			}
+			if !equal(gotStr, tt.want) {
+				t.Errorf("ParseFromReader() = %v, want %v", gotStr, tt.want)
 			}
 		})
 	}
