@@ -29,6 +29,7 @@ type Field struct {
 	all    bool
 }
 
+// parseRule parses a cronrange rule string and returns a Rule struct or an error if the input is invalid
 func parseRule(rule string) (Rule, error) {
 	parts := strings.Fields(rule)
 	if len(parts) != 4 {
@@ -63,6 +64,8 @@ func parseRule(rule string) (Rule, error) {
 	}, nil
 }
 
+// parseTimeRange parses a time range string in the following formats: HH:MM-HH:MM, HH:MM:SS-HH:MM:SS
+// or a single asterisk for all day
 func parseTimeRange(s string) (TimeRange, error) {
 	if s == "*" {
 		return TimeRange{all: true}, nil
@@ -70,6 +73,7 @@ func parseTimeRange(s string) (TimeRange, error) {
 
 	parts := strings.Split(s, "-")
 	if len(parts) != 2 {
+		// this is not a valid time range
 		return TimeRange{}, fmt.Errorf("invalid time range format")
 	}
 
@@ -118,6 +122,10 @@ func parseTime(s string) (time.Duration, error) {
 	return time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute + time.Duration(seconds)*time.Second, nil
 }
 
+// parseField parses a field string in the following formats: 1,2,3, 1-3,5-6 or a single asterisk for all values.
+// The min and max arguments define the range of valid values for the field. The function returns a Field with
+// the parsed values or an error if the input is invalid. Values in the Field are stored in a map
+// for fast lookup of allowed values.
 func parseField(s string, min, max int) (Field, error) {
 	if s == "*" {
 		return Field{all: true}, nil
@@ -168,6 +176,7 @@ func parseField(s string, min, max int) (Field, error) {
 	return Field{values: values}, nil
 }
 
+// matches checks if the rule matches the given time
 func (r Rule) matches(t time.Time) bool {
 	if !r.month.matches(int(t.Month())) {
 		return false
@@ -227,7 +236,7 @@ func (f Field) String() string {
 		return "*"
 	}
 
-	// Get all values from the map
+	// get all values from the map
 	var vals []int
 	for v := range f.values {
 		vals = append(vals, v)
@@ -236,17 +245,17 @@ func (f Field) String() string {
 		return "*"
 	}
 
-	// Sort values
+	// sort values
 	sort.Ints(vals)
 
-	// Find ranges and individual values
+	// find ranges and individual values
 	var ranges []string
 	start := vals[0]
 	prev := start
 
 	for i := 1; i < len(vals); i++ {
 		if vals[i] != prev+1 {
-			// End of a range or single value
+			// end of a range or single value
 			if start == prev {
 				ranges = append(ranges, fmt.Sprintf("%d", start))
 			} else {
@@ -257,7 +266,7 @@ func (f Field) String() string {
 		prev = vals[i]
 	}
 
-	// Handle the last range or value
+	// handle the last range or value
 	if start == prev {
 		ranges = append(ranges, fmt.Sprintf("%d", start))
 	} else {
