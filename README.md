@@ -111,8 +111,8 @@ Alternatively, you can use the `ParseFromReader` function to read rules from an 
 The package validates input and provides specific errors:
 ```go
 // These will return errors
-_, err1 := cronrange.Parse("25:00-26:00 1-5 *"*)    // Invalid hours
-_, err2 := cronrange.Parse("17:20-21:35 7 *"*)      // Invalid day of week
+_, err1 := cronrange.Parse("25:00-26:00 1-5 * *")    // Invalid hours
+_, err2 := cronrange.Parse("17:20-21:35 7 * *")      // Invalid day of week
 _, err3 := cronrange.Parse("17:20-21:35 1-5 32 *")   // Invalid day of month
 _, err4 := cronrange.Parse("17:20-21:35 1-5 * 13")   // Invalid month
 _, err5 := cronrange.Parse("17:20-21:35 1-5 *")      // Wrong number of fields
