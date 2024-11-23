@@ -102,34 +102,35 @@ func parseTimeRange(s string) (TimeRange, error) {
 	}, nil
 }
 
-// parseTime parses a time string in the following formats: HH:MM, HH:MM:SS
-// Returns the duration, whether seconds were specified, and any error
+// parseTime parses a time string in the formats HH:MM or HH:MM:SS.
+// It returns the duration since midnight, a boolean indicating if seconds were specified, and an error if the input is invalid.
+// The function splits the input string by colons, converts the parts to integers, and validates the values.
 func parseTime(s string) (time.Duration, bool, error) {
 	parts := strings.Split(s, ":")
-	if len(parts) < 2 || len(parts) > 3 {
+	if len(parts) < 2 || len(parts) > 3 { // ensure the time string has either 2 or 3 parts
 		return 0, false, fmt.Errorf("invalid time format")
 	}
 
-	hours, err := strconv.Atoi(parts[0])
+	hours, err := strconv.Atoi(parts[0]) // convert the first part to hours
 	if err != nil {
 		return 0, false, err
 	}
 
-	minutes, err := strconv.Atoi(parts[1])
+	minutes, err := strconv.Atoi(parts[1]) // convert the second part to minutes
 	if err != nil {
 		return 0, false, err
 	}
 
 	seconds := 0
-	hasSeconds := len(parts) == 3
+	hasSeconds := len(parts) == 3 // check if the seconds' part is present
 	if hasSeconds {
-		seconds, err = strconv.Atoi(parts[2])
+		seconds, err = strconv.Atoi(parts[2]) // convert the third part to seconds
 		if err != nil {
 			return 0, false, err
 		}
 	}
 
-	if hours < 0 || hours > 23 || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59 {
+	if hours < 0 || hours > 23 || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59 { // validate the time values
 		return 0, false, fmt.Errorf("invalid time values")
 	}
 
@@ -214,10 +215,10 @@ func (r Rule) matches(t time.Time) bool {
 		time.Duration(t.Second())*time.Second
 
 	if r.timeRange.overnight {
-		// For overnight ranges (e.g. 23:00-02:00)
-		// The time matches if it's:
-		// - After or equal to start time (e.g. >= 23:00) OR
-		// - Before or equal to end time (e.g. <= 02:00)
+		// for overnight ranges (e.g. 23:00-02:00)
+		// the time matches if it's:
+		// - after or equal to start time (e.g. >= 23:00) OR
+		// - before or equal to end time (e.g. <= 02:00)
 		return currentTime >= r.timeRange.start || currentTime <= r.timeRange.end
 	}
 
