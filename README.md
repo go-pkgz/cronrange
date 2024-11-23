@@ -45,40 +45,6 @@ Each field (except time) supports:
 ```bash
 go get github.com/go-pkgz/cronrange
 ```
-
-## Command Line Utility
-
-The package includes a command-line utility that can be used to execute commands within specified time ranges.
-If the current time matches the range, the command is executed and the exit code indicates the result. If the time is outside the range, the command is not executed and the exit code is 1.
-
-It can be run without the command just to check if the current time is within the range. in this case, the exit code will indicate the result, i.e. 0 if the time is within the range, 1 otherwise.
-
-Install it with:
-
-```bash
-go install github.com/go-pkgz/cronrange/cmd@latest
-```
-
-### Usage
-
-```bash
-cronrange "TIME_RANGE" [command args...]
-```
-
-Examples:
-```bash
-# Check if current time is within range (exit code indicates result)
-cronrange "17:20-21:35 1-5 * *"
-
-# Execute command only if within range
-cronrange "17:20-21:35 1-5 * *" echo "Running backup"
-```
-
-Exit codes:
-- 0: Time matches range (or command executed successfully)
-- 1: Time outside range (or command failed)
-- 2: Invalid arguments or parsing error
-
 ## Library Usage
 
 ```go
@@ -118,3 +84,37 @@ _, err3 := cronrange.Parse("17:20-21:35 1-5 32 *")   // Invalid day of month
 _, err4 := cronrange.Parse("17:20-21:35 1-5 * 13")   // Invalid month
 _, err5 := cronrange.Parse("17:20-21:35 1-5 *")      // Wrong number of fields
 ```
+
+## Command Line Utility
+
+The package includes a command-line utility that can be used to execute commands within specified time ranges.
+If the current time matches the range, the command is executed and the exit code indicates the result. If the time is outside the range, the command is not executed and the exit code is 1.
+
+It can be run without the command just to check if the current time is within the range. in this case, the exit code will indicate the result, i.e. 0 if the time is within the range, 1 otherwise.
+
+Install it with:
+
+```bash
+go install github.com/go-pkgz/cronrange/cmd@latest
+```
+
+### Usage
+
+```bash
+cronrange "TIME_RANGE" [command args...]
+```
+
+Examples:
+```bash
+# Check if current time is within range (exit code indicates result)
+cronrange "17:20-21:35 1-5 * *"
+
+# Execute command only if within range
+cronrange "17:20-21:35 1-5 * *" echo "Running backup"
+```
+
+Exit codes:
+- 0: Time matches range (or command executed successfully)
+- 1: Time outside range (or command failed)
+- 2: Invalid arguments or parsing error
+
