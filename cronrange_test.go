@@ -68,6 +68,11 @@ func TestParse(t *testing.T) {
 			expr:    "17:20-21:35 1-5 *",
 			wantErr: true,
 		},
+		{
+			name:    "empty expression",
+			expr:    "",
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
