@@ -39,7 +39,7 @@ func Parse(expr string) ([]Rule, error) {
 	for _, r := range rules {
 		rule, err := parseRule(strings.TrimSpace(r))
 		if err != nil {
-			return nil, fmt.Errorf("invalid rule '%s': %w", r, err)
+			return nil, fmt.Errorf("invalid rule %q: %w", r, err)
 		}
 		result = append(result, rule)
 	}
@@ -66,7 +66,7 @@ func ParseFromReader(rdr io.Reader) ([]Rule, error) {
 		}
 		r, err := Parse(rule)
 		if err != nil {
-			return nil, fmt.Errorf("invalid rule '%s': %w", rule, err)
+			return nil, fmt.Errorf("invalid rule %q: %w", rule, err)
 		}
 		res = append(res, r...)
 	}
