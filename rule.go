@@ -18,9 +18,11 @@ type Rule struct {
 
 // TimeRange represents a time period within a day
 type TimeRange struct {
-	start time.Duration // minutes since midnight
-	end   time.Duration
-	all   bool
+	start      time.Duration // minutes since midnight
+	end        time.Duration
+	all        bool
+	overnight  bool // true if range spans across midnight
+	hasSeconds bool // track if the original format included seconds
 }
 
 // Field represents a cronrange field that can contain multiple values
@@ -65,7 +67,7 @@ func parseRule(rule string) (Rule, error) {
 }
 
 // parseTimeRange parses a time range string in the following formats: HH:MM-HH:MM, HH:MM:SS-HH:MM:SS
-// or a single asterisk for all day
+// or a single asterisk for all day. Handles ranges that span across midnight.
 func parseTimeRange(s string) (TimeRange, error) {
 	if s == "*" {
 		return TimeRange{all: true}, nil
@@ -73,53 +75,65 @@ func parseTimeRange(s string) (TimeRange, error) {
 
 	parts := strings.Split(s, "-")
 	if len(parts) != 2 {
-		// this is not a valid time range
 		return TimeRange{}, fmt.Errorf("invalid time range format")
 	}
 
-	start, err := parseTime(parts[0])
+	start, hasStartSeconds, err := parseTime(parts[0])
 	if err != nil {
 		return TimeRange{}, err
 	}
 
-	end, err := parseTime(parts[1])
+	end, hasEndSeconds, err := parseTime(parts[1])
 	if err != nil {
 		return TimeRange{}, err
 	}
 
-	return TimeRange{start: start, end: end}, nil
+	// Check if this is an overnight range
+	overnight := false
+	if end < start {
+		overnight = true
+	}
+
+	return TimeRange{
+		start:      start,
+		end:        end,
+		overnight:  overnight,
+		hasSeconds: hasStartSeconds || hasEndSeconds,
+	}, nil
 }
 
-// parseTime parses a time string in the following formats: HH:MM, HH-MM-SS
-func parseTime(s string) (time.Duration, error) {
+// parseTime parses a time string in the following formats: HH:MM, HH:MM:SS
+// Returns the duration, whether seconds were specified, and any error
+func parseTime(s string) (time.Duration, bool, error) {
 	parts := strings.Split(s, ":")
 	if len(parts) < 2 || len(parts) > 3 {
-		return 0, fmt.Errorf("invalid time format")
+		return 0, false, fmt.Errorf("invalid time format")
 	}
 
 	hours, err := strconv.Atoi(parts[0])
 	if err != nil {
-		return 0, err
+		return 0, false, err
 	}
 
 	minutes, err := strconv.Atoi(parts[1])
 	if err != nil {
-		return 0, err
+		return 0, false, err
 	}
 
 	seconds := 0
-	if len(parts) == 3 {
+	hasSeconds := len(parts) == 3
+	if hasSeconds {
 		seconds, err = strconv.Atoi(parts[2])
 		if err != nil {
-			return 0, err
+			return 0, false, err
 		}
 	}
 
 	if hours < 0 || hours > 23 || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59 {
-		return 0, fmt.Errorf("invalid time values")
+		return 0, false, fmt.Errorf("invalid time values")
 	}
 
-	return time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute + time.Duration(seconds)*time.Second, nil
+	return time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute + time.Duration(seconds)*time.Second, hasSeconds, nil
 }
 
 // parseField parses a field string in the following formats: 1,2,3, 1-3,5-6 or a single asterisk for all values.
@@ -176,7 +190,8 @@ func parseField(s string, min, max int) (Field, error) {
 	return Field{values: values}, nil
 }
 
-// matches checks if the rule matches the given time
+// matches checks if the current time falls within the time range,
+// handling ranges that span across midnight
 func (r Rule) matches(t time.Time) bool {
 	if !r.month.matches(int(t.Month())) {
 		return false
@@ -194,8 +209,20 @@ func (r Rule) matches(t time.Time) bool {
 		return true
 	}
 
-	currentMinutes := time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute
-	return currentMinutes >= r.timeRange.start && currentMinutes <= r.timeRange.end
+	currentTime := time.Duration(t.Hour())*time.Hour +
+		time.Duration(t.Minute())*time.Minute +
+		time.Duration(t.Second())*time.Second
+
+	if r.timeRange.overnight {
+		// For overnight ranges (e.g. 23:00-02:00)
+		// The time matches if it's:
+		// - After or equal to start time (e.g. >= 23:00) OR
+		// - Before or equal to end time (e.g. <= 02:00)
+		return currentTime >= r.timeRange.start || currentTime <= r.timeRange.end
+	}
+
+	// For same-day ranges, time must be between start and end
+	return currentTime >= r.timeRange.start && currentTime <= r.timeRange.end
 }
 
 func (f Field) matches(val int) bool {
@@ -217,6 +244,7 @@ func (tr TimeRange) String() string {
 	if tr.all {
 		return "*"
 	}
+
 	startH := tr.start / time.Hour
 	startM := (tr.start % time.Hour) / time.Minute
 	startS := (tr.start % time.Minute) / time.Second
@@ -224,8 +252,9 @@ func (tr TimeRange) String() string {
 	endM := (tr.end % time.Hour) / time.Minute
 	endS := (tr.end % time.Minute) / time.Second
 
-	if startS > 0 || endS > 0 {
-		return fmt.Sprintf("%02d:%02d:%02d-%02d:%02d:%02d", startH, startM, startS, endH, endM, endS)
+	if tr.hasSeconds {
+		return fmt.Sprintf("%02d:%02d:%02d-%02d:%02d:%02d",
+			startH, startM, startS, endH, endM, endS)
 	}
 	return fmt.Sprintf("%02d:%02d-%02d:%02d", startH, startM, endH, endM)
 }
