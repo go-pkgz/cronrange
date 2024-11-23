@@ -28,14 +28,15 @@ Each field (except time) supports:
 
 ```
 # Basic patterns
-17:20-21:35 1-5 * *         # Weekdays from 5:20 PM to 9:35 PM
-17:20:15-21:35:16 1-5 * *   # Weekdays from 5:20:15 PM to 9:35:16 PM
+17:20-21:35 1-5 * *          # Weekdays from 5:20 PM to 9:35 PM
+17:20:15-21:35:16 1-5 * *    # Weekdays from 5:20:15 PM to 9:35:16 PM
 * 0,6 * *                    # All day on weekends
 09:00-17:00 1-5 * 4-9        # Weekdays 9 AM to 5 PM, April through September
 12:00-13:00 * 1,15 *         # Noon-1 PM on 1st and 15th of every month
+23:00-07:00 * * *            # Overnight range from 11 PM to 7 AM, every day
 
 # Multiple rules combined:
-17:20-21:35 1-5 *;* * 0,6 * *    # Weekday evenings and all weekend
+17:20-21:35 1-5 *;* * 0,6 * *              # Weekday evenings and all weekend
 09:00-17:00 * *1-5; 10:00-16:00 * *6-12    # Different hours for different months
 ```
 
