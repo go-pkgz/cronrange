@@ -40,6 +40,21 @@ Each field (except time) supports:
 09:00-17:00 * * 1-5; 10:00-16:00 * * 6-12  # Different hours for different months
 ```
 
+## Overnight Ranges
+
+A time range with the end earlier than the start spans midnight, for example `23:00-02:00`. Each rule is
+evaluated against a single calendar day: the `dow`, `dom` and `month` fields are matched against the day
+shown on the clock, and the time matches when it is at or after the start, or at or before the end.
+
+With wildcard calendar fields this gives the continuous overnight window every night, which is what
+`23:00-07:00 * * *` above describes. With a narrower field it does not. `23:00-02:00 1 * *` selects
+Mondays, so it matches Monday 00:00 to 02:00 and Monday 23:00 to midnight, and it does not match
+Tuesday 00:30. To express a window running from Monday evening into Tuesday morning, split it in two:
+
+```
+23:00-23:59:59 1 * *;00:00-02:00 2 * *     # Monday 11 PM to Tuesday 2 AM
+```
+
 ## Installation
 
 ```bash

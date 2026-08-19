@@ -281,6 +281,18 @@ func TestMatches(t *testing.T) {
 			wantMatch: []bool{false, true, true, true, true, true, false},
 		},
 		{
+			name: "overnight range with weekday filter, evaluated per calendar day",
+			rule: "23:00-02:00 1 * *", // Monday
+			times: []time.Time{
+				time.Date(2024, 1, 1, 0, 30, 0, 0, time.UTC),  // Mon, before the end time
+				time.Date(2024, 1, 1, 22, 30, 0, 0, time.UTC), // Mon, between end and start
+				time.Date(2024, 1, 1, 23, 30, 0, 0, time.UTC), // Mon, after the start time
+				time.Date(2024, 1, 2, 0, 30, 0, 0, time.UTC),  // Tue, dow does not match
+				time.Date(2024, 1, 2, 23, 30, 0, 0, time.UTC), // Tue, dow does not match
+			},
+			wantMatch: []bool{true, false, true, false, false},
+		},
+		{
 			name: "specific days",
 			rule: "10:00-12:00 1,3,5 * *", // Mon,Wed,Fri
 			times: []time.Time{
