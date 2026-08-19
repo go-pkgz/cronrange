@@ -20,6 +20,12 @@
 //	* 0,6 * *                    # All day on weekends
 //	09:00-17:00 1-5 * 4-9        # Weekdays 9 AM to 5 PM, April through September
 //	12:00-13:00 * 1,15 *         # Noon-1 PM on 1st and 15th of every month
+//
+// A time range with the end earlier than the start spans midnight, for example 23:00-02:00. Each
+// rule is evaluated against a single calendar day, so the dow, dom and month fields are matched
+// against the day shown on the clock. With a narrower field that splits the window: 23:00-02:00 1 * *
+// matches Monday 00:00-02:00 and Monday 23:00 to midnight, not Monday evening through Tuesday
+// morning. Two rules express the latter: 23:00-23:59:59 1 * *;00:00-02:00 2 * *
 package cronrange
 
 import (

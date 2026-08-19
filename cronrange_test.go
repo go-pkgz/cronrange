@@ -152,6 +152,30 @@ func TestMatch(t *testing.T) {
 			want: false,
 		},
 		{
+			name: "monday night into tuesday morning, split into two rules",
+			expr: "23:00-23:59:59 1 * *;00:00-02:00 2 * *",
+			time: time.Date(2024, 1, 1, 23, 30, 0, 0, time.UTC), // Monday 11:30 PM
+			want: true,
+		},
+		{
+			name: "monday night into tuesday morning, tail on tuesday",
+			expr: "23:00-23:59:59 1 * *;00:00-02:00 2 * *",
+			time: time.Date(2024, 1, 2, 0, 30, 0, 0, time.UTC), // Tuesday 12:30 AM
+			want: true,
+		},
+		{
+			name: "monday night into tuesday morning, after the tail",
+			expr: "23:00-23:59:59 1 * *;00:00-02:00 2 * *",
+			time: time.Date(2024, 1, 2, 2, 0, 1, 0, time.UTC), // Tuesday 2:00:01 AM
+			want: false,
+		},
+		{
+			name: "monday night into tuesday morning, monday early hours excluded",
+			expr: "23:00-23:59:59 1 * *;00:00-02:00 2 * *",
+			time: time.Date(2024, 1, 1, 0, 30, 0, 0, time.UTC), // Monday 12:30 AM
+			want: false,
+		},
+		{
 			name: "specific month days match",
 			expr: "12:00-13:00 * 1,15 *",
 			time: time.Date(2024, 1, 15, 12, 30, 0, 0, time.UTC), // 15th at 12:30
