@@ -87,15 +87,15 @@ func TestParse(t *testing.T) {
 			}
 
 			// Convert the rules back to string and check
-			var gotStr string
+			var gotStr strings.Builder
 			for i, rule := range got {
 				if i > 0 {
-					gotStr += "; "
+					gotStr.WriteString("; ")
 				}
-				gotStr += rule.String()
+				gotStr.WriteString(rule.String())
 			}
-			if gotStr != tt.want {
-				t.Errorf("Parse() = %v, want %v", gotStr, tt.want)
+			if gotStr.String() != tt.want {
+				t.Errorf("Parse() = %v, want %v", gotStr.String(), tt.want)
 			}
 		})
 	}
