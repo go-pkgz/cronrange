@@ -36,8 +36,8 @@ Each field (except time) supports:
 23:00-07:00 * * *            # Overnight range from 11 PM to 7 AM, every day
 
 # Multiple rules combined:
-17:20-21:35 1-5 *;* * 0,6 * *              # Weekday evenings and all weekend
-09:00-17:00 * *1-5; 10:00-16:00 * *6-12    # Different hours for different months
+17:20-21:35 1-5 * *;* 0,6 * *              # Weekday evenings and all weekend
+09:00-17:00 * * 1-5; 10:00-16:00 * * 6-12  # Different hours for different months
 ```
 
 ## Installation
@@ -51,7 +51,7 @@ go get github.com/go-pkgz/cronrange
 import "github.com/go-pkgz/cronrange"
 
 // Parse rules
-rules, err := cronrange.Parse("17:20-21:35 1-5 *;* * 0,6 * *")
+rules, err := cronrange.Parse("17:20-21:35 1-5 * *;* 0,6 * *")
 if err != nil {
     log.Fatal(err)
 }
@@ -68,7 +68,7 @@ if cronrange.Match(rules, t) {
 }
 
 // Rules can be converted back to string format
-fmt.Println(rules[0].String()) // "17:20-21:35 1-5 *"
+fmt.Println(rules[0].String()) // "17:20-21:35 1-5 * *"
 ```
 
 Alternatively, you can use the `ParseFromReader` function to read rules from an `io.Reader`
